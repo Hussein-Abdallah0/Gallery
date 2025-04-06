@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\UserImage;
+use App\Models\Image;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class UserImageSeeder extends Seeder
+class ImageSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        UserImage::factory(10)->create();
+        Image::factory(10)->create();
     }
 }
