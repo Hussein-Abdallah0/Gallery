@@ -6,11 +6,12 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\LoginHistory>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Image>
  */
-class LoginHistoryFactory extends Factory
+class ImageFactory extends Factory
 {
-    protected $model = LoginHistory::class;
+
+    protected $model = Image::class;
     /**
      * Define the model's default state.
      *
@@ -20,9 +21,9 @@ class LoginHistoryFactory extends Factory
     {
         return [
             'user_id' => User::inRandomOrder()->first()->id,
-            'ip_address' => $this->faker->ipv4,
-            'geolocation' => $this->faker->city,
-            'login_time' => now(),
+            'title' => $this->faker->word,
+            'file_path' => $this->faker->imageUrl,
+            'created_at' => now(),
         ];
     }
 }

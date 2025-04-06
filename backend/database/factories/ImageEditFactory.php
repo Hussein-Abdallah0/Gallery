@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Image;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ImageEditFactory extends Factory
 {
+    protected $model = ImageEdit::class;
     /**
      * Define the model's default state.
      *
@@ -17,7 +19,10 @@ class ImageEditFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'image_id' => Image::inRandomOrder()->first()->id,
+            'operation_type' => $this->faker->randomElement(['crop', 'watermark', 'rotate', 'bw_conversion']),
+            'operation_details' => $this->faker->text,
+            'created_at' => now(),
         ];
     }
 }

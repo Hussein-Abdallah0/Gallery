@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('login_histories', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('login_history', function (Blueprint $table) {
+            $table->id('id')->unsigned();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('ip_address', 45);
+            $table->string('geolocation', 255)->nullable();
+            $table->timestamps(0);
         });
     }
 

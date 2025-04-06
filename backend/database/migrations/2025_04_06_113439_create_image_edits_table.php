@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('image_edits', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->id('id')->unsigned();
+            $table->foreignId('image_id')->constrained('user_images')->onDelete('cascade');
+            $table->enum('operation_type', ['crop', 'watermark', 'rotate', 'bw_conversion']);
+            $table->text('operation_details')->nullable();
+            $table->timestamps(0);
         });
     }
 
