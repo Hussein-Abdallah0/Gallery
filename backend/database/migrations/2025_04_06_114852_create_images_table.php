@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('images', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->id('id')->unsigned();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('title', 255);
+            $table->string('file_path', 255);
+            $table->timestamps(0);
         });
     }
 
