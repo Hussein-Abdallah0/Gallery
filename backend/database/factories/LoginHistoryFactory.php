@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class LoginHistoryFactory extends Factory
 {
+    protected $model = LoginHistory::class;
     /**
      * Define the model's default state.
      *

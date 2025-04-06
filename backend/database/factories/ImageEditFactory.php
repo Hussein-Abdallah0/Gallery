@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ImageEditFactory extends Factory
 {
+    protected $model = ImageEdit::class;
     /**
      * Define the model's default state.
      *
