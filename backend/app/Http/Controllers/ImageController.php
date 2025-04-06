@@ -119,29 +119,4 @@ class ImageController extends Controller
 
         return response()->json(['success' => 'true', 'message' => 'Image deleted']);
     }
-
-    public function addImageEdit(Request $request, $id)
-    {
-        $request->validate([
-            'operation_type' => 'required|string|in:crop,rotate,watermark,bw_conversion',
-            'operation_details' => 'nullable|array',
-        ]);
-
-        $image = Image::findOrFail($id);
-
-        if ($image->user_id != JWTAuth::user()->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        // Store the image edit details
-        $imageEdit = $image->imageEdits()->create([
-            'operation_type' => $request->operation_type,
-            'operation_details' => json_encode($request->operation_details),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'image_edit' => $imageEdit
-        ]);
-    }
 }
