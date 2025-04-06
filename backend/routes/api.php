@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\ImageEditController;
 use App\Http\Controllers\LoginHistoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,7 @@ Route::group(['prefix' => 'v1'], function () {
 
         Route::apiResource('images', ImageController::class);
         Route::get('login-history', [LoginHistoryController::class, 'index']);
+        Route::post('/images/{id}/edits', [ImageEditController::class, 'store']);
     });
 
     //Unauthenticated Users
