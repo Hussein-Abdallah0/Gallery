@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LoginHistory;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use Stevebauman\Location\Facades\Location;
 
 class AuthController extends Controller
 {
@@ -36,6 +39,27 @@ class AuthController extends Controller
         if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        $user = Auth::user();
+
+        // Get IP
+        $ip = $request->ip();
+
+        // Get location from IP
+        $position = Location::get($ip);
+
+        $geolocation = $position
+            ? $position->countryName . ', ' . $position->regionName . ', ' . $position->cityName
+            : 'Unknown';
+
+        // Save login history
+        LoginHistory::create([
+            'user_id' => $user->id,
+            'ip_address' => $ip,
+            'geolocation' => $geolocation,
+            'latitude' => $position?->latitude,
+            'longitude' => $position?->longitude,
+        ]);
 
         return response()->json(['success' => 'true', 'token' => $token]);
     }

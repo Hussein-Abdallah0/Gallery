@@ -123,4 +123,12 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    // 'providers' => [
+    //     Stevebauman\Location\LocationServiceProvider::class,
+    // ],
+
+    // 'aliases' => [
+    //     'Location' => Stevebauman\Location\Facades\Location::class,
+    // ],
+
 ];

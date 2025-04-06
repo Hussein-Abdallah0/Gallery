@@ -14,7 +14,8 @@ class LoginHistory extends Model
         'user_id',
         'ip_address',
         'geolocation',
-        'login_time',
+        'latitude',
+        'longitude',
     ];
 
     public function user()
