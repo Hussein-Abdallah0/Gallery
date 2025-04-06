@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\LoginHistory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,6 @@ class LoginHistorySeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        LoginHistory::factory(10)->create();
     }
 }
