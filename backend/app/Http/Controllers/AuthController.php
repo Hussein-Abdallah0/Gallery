@@ -16,13 +16,13 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
+            'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -48,21 +48,29 @@ class AuthController extends Controller
         // Get location from IP
         $position = Location::get($ip);
 
-        $geolocation = $position
-            ? $position->countryName . ', ' . $position->regionName . ', ' . $position->cityName
-            : 'Unknown';
+        // Check if the location was found
+        if ($position === false) {
+            $geolocation = 'Unknown';
+            $latitude = null;
+            $longitude = null;
+        } else {
+            $geolocation = $position->countryName . ', ' . $position->regionName . ', ' . $position->cityName;
+            $latitude = $position->latitude;
+            $longitude = $position->longitude;
+        }
 
         // Save login history
         LoginHistory::create([
             'user_id' => $user->id,
             'ip_address' => $ip,
             'geolocation' => $geolocation,
-            'latitude' => $position?->latitude,
-            'longitude' => $position?->longitude,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
         ]);
 
         return response()->json(['success' => 'true', 'token' => $token]);
     }
+
 
 
     public function me()
