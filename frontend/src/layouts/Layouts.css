@@ -1,0 +1,33 @@
+/* Shared layout styles */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}
+
+/* Full-width content (for non-sidebar pages) */
+.main-content.full-width {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  padding: 20px;
+}
+
+/* Sidebar-adjusted content */
+.main-content.with-sidebar {
+  margin-left: 250px; /* Matches sidebar width */
+  width: calc(100% - 250px);
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .main-content.with-sidebar {
+    margin-left: 0;
+    width: 100%;
+  }
+}

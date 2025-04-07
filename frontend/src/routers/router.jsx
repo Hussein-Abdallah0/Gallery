@@ -4,24 +4,26 @@ import App from "../App";
 import Home from "../pages/Home/Home";
 import Login from "../pages/Login/Login";
 import Signup from "../pages/Signup/Signup";
-import SideBar from "../components/SideBar/Sidebar";
+import WithoutSidebar from "../layouts/WithoutSidebar";
+import WithSidebar from "../layouts/WithSidebar";
 
 const router = createHashRouter([
   {
     path: "/",
-    element: <App />, // Main layout component
+    element: <App />,
     children: [
       {
-        path: "/", // Home route for '/'
-        element: <SideBar />,
+        // Routes WITHOUT sidebar
+        element: <WithoutSidebar />,
+        children: [
+          { path: "/", element: <Login /> },
+          { path: "/signup", element: <Signup /> },
+        ],
       },
       {
-        path: "/home", // Home route for '/'
-        element: <Home />,
-      },
-      {
-        path: "/signup", // Home route for '/'
-        element: <Signup />,
+        // Routes WITH sidebar
+        element: <WithSidebar />,
+        children: [{ path: "/home", element: <Home /> }],
       },
     ],
   },
