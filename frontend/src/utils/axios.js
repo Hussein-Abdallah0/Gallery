@@ -2,7 +2,7 @@ import axios from "axios";
 
 const token = localStorage.getItem("token");
 
-const BaseURL = "http://localhost:5173";
+const BaseURL = "http://127.0.0.1:8000";
 const Endpoint = "/api/v1";
 
 const axiosBaseUrl = axios.create({

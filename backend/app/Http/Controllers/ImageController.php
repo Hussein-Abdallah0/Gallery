@@ -9,9 +9,6 @@ use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class ImageController extends Controller
 {
-
-
-
     public function index()
     {
         $user = JWTAuth::user();

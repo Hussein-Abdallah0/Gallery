@@ -18,7 +18,7 @@ const Login = () => {
       const response = await axiosBaseUrl.post("/login", form);
 
       if (response.data.success) {
-        const token = response.data.token;
+        // const token = response.data.token;
 
         navigate("/home");
       }
@@ -68,9 +68,14 @@ const Login = () => {
 
           <input type="submit" value="Log In" className="primary-btn" />
         </form>
-        <a href="./signup">
-          <button className="secondary-btn">Sign Up</button>
-        </a>
+        <button
+          className="secondary-btn"
+          onClick={() => {
+            navigate("/signup");
+          }}
+        >
+          Sign Up
+        </button>
       </div>
     </div>
   );

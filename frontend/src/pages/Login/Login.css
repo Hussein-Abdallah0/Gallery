@@ -26,11 +26,6 @@
   text-align: start;
 }
 
-.login-input > input {
-  margin-top: 10px;
-  align-self: center;
-}
-
 .login-input {
   display: flex;
   flex-direction: column;

@@ -11,6 +11,7 @@
   --font-size-sm: 14px;
 
   --border-radius: 10px;
+  height: 100%;
 }
 
 * {
@@ -57,6 +58,7 @@ body {
   border: 1px solid var(--primary);
   background-color: transparent;
   outline: none;
+  margin-top: 10px;
 }
 
 .primary-btn:hover {
@@ -98,3 +100,17 @@ body {
   font-size: var(--font-size-sm);
   color: #666;
 } */
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+nav {
+  height: 100%;
+  width: 300px;
+}
+
+body {
+  height: 100%;
+  width: 100%;
+}
