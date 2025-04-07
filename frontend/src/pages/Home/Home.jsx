@@ -6,6 +6,7 @@ const os = window.require("os");
 
 const Home = () => {
   const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const userHomeDir = os.homedir();
   const saveDir = path.join(userHomeDir, "ElectronPhotoApp", "user_images");
@@ -58,11 +59,29 @@ const Home = () => {
         const base64 = imageBuffer.toString("base64");
         const ext = path.extname(file).substring(1); // remove the dot
         const dataUrl = `data:image/${ext};base64,${base64}`;
-        imageList.push(dataUrl);
+        imageList.push({ src: dataUrl, path: fullPath });
       }
     });
 
     setImages(imageList);
+  };
+
+  const handleImageClick = (img) => {
+    setSelectedImage((prev) => (prev === img ? null : img)); // toggle
+  };
+
+  const handleDelete = () => {
+    if (selectedImage && selectedImage.path) {
+      fs.unlink(selectedImage.path, (err) => {
+        if (err) {
+          console.error("Failed to delete image:", err);
+        } else {
+          console.log("Image deleted:", selectedImage.path);
+          setSelectedImage(null);
+          loadImages();
+        }
+      });
+    }
   };
 
   useEffect(() => {
@@ -73,16 +92,38 @@ const Home = () => {
     <div className="photos">
       <div className="row">
         <h1 className="">Photos</h1>
-        <div className="upload-section">
-          <input type="file" id="image-upload" onChange={handleUpload} />
-          <label htmlFor="image-upload" className="primary-btn">
-            Upload Image
-          </label>
+        <div className="right">
+          {selectedImage && (
+            <div className="edit-toolbar">
+              <button className="secondary-btn">Edit</button>
+              <button className="delete-btn" onClick={handleDelete}>
+                Delete
+              </button>
+            </div>
+          )}
+          <div className="upload-section">
+            <input type="file" id="image-upload" onChange={handleUpload} />
+            <label htmlFor="image-upload" className="upload-btn">
+              Upload Image
+            </label>
+          </div>
         </div>
       </div>
+
       <div className="gallery">
-        {images.map((src, index) => (
-          <img key={index} src={src} alt={`uploaded-${index}`} className="image-thumbnail" />
+        {images.map((image, index) => (
+          <div
+            key={index}
+            className={`image-container ${selectedImage?.src === image.src ? "selected" : ""}`}
+            onClick={() => handleImageClick(image)}
+          >
+            <img src={image.src} alt={`uploaded-${index}`} className="image-thumbnail" />
+            {selectedImage?.src === image.src && (
+              <div className="overlay">
+                <span className="checkmark">✔</span>
+              </div>
+            )}
+          </div>
         ))}
       </div>
     </div>
