@@ -1,0 +1,27 @@
+.edit-panel {
+  position: fixed;
+  width: 60vw;
+  height: 75vh;
+  top: 100px;
+  right: 300px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.edit-preview {
+  max-width: 100%;
+  margin: 15px 0;
+}
+
+.edit-options button {
+  margin-right: 10px;
+}

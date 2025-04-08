@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Home.css";
+import Edit from "../Edit/Edit";
 const fs = window.require("fs");
 const path = window.require("path");
 const os = window.require("os");
@@ -7,6 +8,7 @@ const os = window.require("os");
 const Home = () => {
   const [images, setImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const userHomeDir = os.homedir();
   const saveDir = path.join(userHomeDir, "ElectronPhotoApp", "user_images");
@@ -92,10 +94,15 @@ const Home = () => {
     <div className="photos">
       <div className="row">
         <h1 className="">Photos</h1>
+        {isEditing && selectedImage && (
+          <Edit image={selectedImage} onClose={() => setIsEditing(false)} />
+        )}
         <div className="right">
           {selectedImage && (
             <div className="edit-toolbar">
-              <button className="secondary-btn">Edit</button>
+              <button className="secondary-btn" onClick={() => setIsEditing(true)}>
+                Edit
+              </button>
               <button className="delete-btn" onClick={handleDelete}>
                 Delete
               </button>
