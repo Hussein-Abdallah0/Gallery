@@ -10,8 +10,6 @@ const Edit = ({ image, onClose }) => {
           X
         </button>
       </div>
-      <img src={image.src} alt="To edit" className="edit-preview" />
-
       {/* Add editing tools here */}
       <div className="edit-options">
         <button>Crop</button>
@@ -19,6 +17,7 @@ const Edit = ({ image, onClose }) => {
         <button>Black & White</button>
         <button>Watermark</button>
       </div>
+      <img src={image.src} alt="To edit" className="edit-preview" />
     </div>
   );
 };

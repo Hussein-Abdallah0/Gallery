@@ -53,3 +53,9 @@
   background-color: var(--secondary);
   color: var(--white);
 }
+
+.menu {
+  cursor: pointer;
+  color: var(--primary);
+  margin-left: 13px;
+}
