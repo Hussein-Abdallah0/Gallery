@@ -15,11 +15,20 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axiosBaseUrl.post("/login", form);
+      // Fetch IP-based geolocation data
+      const locationRes = await fetch("https://ipapi.co/json");
+      const locationData = await locationRes.json();
+
+      // Add latitude and longitude to the form data
+      const loginData = {
+        ...form,
+        latitude: locationData.latitude,
+        longitude: locationData.longitude,
+      };
+
+      const response = await axiosBaseUrl.post("/login", loginData);
 
       if (response.data.success) {
-        // const token = response.data.token;
-
         navigate("/home");
       }
     } catch (error) {

@@ -41,36 +41,26 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-
-        // Get IP
         $ip = $request->ip();
 
-        // Get location from IP
-        $position = Location::get($ip);
-
-        // Check if the location was found
-        if ($position === false) {
-            $geolocation = 'Unknown';
-            $latitude = null;
-            $longitude = null;
-        } else {
-            $geolocation = $position->countryName . ', ' . $position->regionName . ', ' . $position->cityName;
-            $latitude = $position->latitude;
-            $longitude = $position->longitude;
-        }
-
-        // Save login history
-        LoginHistory::create([
+        $loginData = [
             'user_id' => $user->id,
             'ip_address' => $ip,
-            'geolocation' => $geolocation,
-            'latitude' => $latitude,
-            'longitude' => $longitude,
-        ]);
+        ];
+
+        // Use frontend-provided coordinates if available
+        if ($request->has(['latitude', 'longitude'])) {
+            $loginData['latitude'] = $request->latitude;
+            $loginData['longitude'] = $request->longitude;
+        } else {
+            // Fallback to simple IP-based location
+            $loginData['geolocation'] = "IP: $ip";
+        }
+
+        LoginHistory::create($loginData);
 
         return response()->json(['success' => 'true', 'token' => $token]);
     }
-
 
 
     public function me()
