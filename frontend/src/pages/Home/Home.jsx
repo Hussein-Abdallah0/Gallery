@@ -39,7 +39,6 @@ const Home = () => {
         if (err) {
           console.error("Failed to save image:", err);
         } else {
-          console.log("Image saved to:", savePath);
           loadImages();
         }
       });
@@ -78,7 +77,6 @@ const Home = () => {
         if (err) {
           console.error("Failed to delete image:", err);
         } else {
-          console.log("Image deleted:", selectedImage.path);
           setSelectedImage(null);
           loadImages();
         }

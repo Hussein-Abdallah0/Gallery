@@ -60,6 +60,10 @@ body {
   margin: 10px;
 }
 
+.flex {
+  display: flex;
+}
+
 .input {
   width: 450px;
   height: 45px;
