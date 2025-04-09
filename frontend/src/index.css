@@ -86,6 +86,12 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin: 10px;
+}
+
+.secondary-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 /* Text Styles */
@@ -122,4 +128,15 @@ nav {
 body {
   height: 100%;
   width: 100%;
+}
+
+@media (max-width: 976px) {
+  .primary-btn {
+    width: 100px;
+    height: 40px;
+  }
+  .secondary-btn {
+    width: 100px;
+    height: 40px;
+  }
 }

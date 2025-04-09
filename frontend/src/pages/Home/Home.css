@@ -9,7 +9,7 @@
 }
 
 .upload-section {
-  margin-left: 10px;
+  /* margin-left: 10px; */
   margin-right: 70px;
 }
 
@@ -23,11 +23,15 @@
   width: 200px;
   cursor: pointer;
   color: white;
-  padding-left: 33px;
-  padding-top: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: var(--font-size-md);
   background-color: var(--primary);
   border-radius: var(--border-radius);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin: 10px;
 }
 
 .image-grid {
@@ -118,15 +122,13 @@
 }
 
 .delete-btn {
-  width: 200px;
-  height: 50px;
-  border-radius: var(--border-radius);
   background-color: red;
   color: white;
-  /* border: 2px solid var(--primary); */
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-left: 10px;
+}
+
+@media (max-width: 976px) {
+  .upload-btn {
+    width: 100px;
+    height: 40px;
+  }
 }

@@ -1,0 +1,21 @@
+.crop-area {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 60vh;
+}
+
+.crop-buttons {
+  justify-content: center;
+  margin-top: 10px;
+  gap: 10px;
+  z-index: 0;
+  height: 50px;
+}
+
+.crop-buttons > button {
+  background-color: white;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}

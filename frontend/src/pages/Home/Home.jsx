@@ -103,16 +103,21 @@ const Home = () => {
               <button className="secondary-btn" onClick={() => setIsEditing(true)}>
                 Edit
               </button>
-              <button className="delete-btn" onClick={handleDelete}>
+              <button className="delete-btn primary-btn" onClick={handleDelete}>
                 Delete
               </button>
             </div>
           )}
           <div className="upload-section">
-            <input type="file" id="image-upload" onChange={handleUpload} />
             <label htmlFor="image-upload" className="upload-btn">
-              Upload Image
+              Upload
             </label>
+            <input
+              type="file"
+              id="image-upload"
+              onChange={handleUpload}
+              style={{ display: "none" }}
+            />
           </div>
         </div>
       </div>

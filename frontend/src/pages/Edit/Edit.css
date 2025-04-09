@@ -1,14 +1,21 @@
 .edit-panel {
-  position: fixed;
   width: 60vw;
   height: auto;
+  padding: 20px;
+}
+
+.edit-page {
   top: 10vh;
   right: 15vw;
-  background: #fff;
-  padding: 20px;
+  position: fixed;
+  width: 70vw;
+  background: var(--secondary);
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
   z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .edit-header {
@@ -20,9 +27,50 @@
 .edit-preview {
   width: 100%;
   height: auto;
+  max-height: 60vh;
   margin: 15px 0;
 }
 
-.edit-options button {
-  margin-right: 10px;
+.edit-options {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.edit-icon {
+  cursor: pointer;
+}
+
+.close-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.rotate-options {
+  display: flex;
+  justify-content: space-between;
+}
+
+.rotate {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 1022px) {
+  .primary-btn {
+    width: 100px;
+    height: 40px;
+  }
+  .secondary-btn {
+    width: 100px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 976px) {
+  .edit-header {
+    flex-direction: column-reverse;
+  }
 }
