@@ -10,6 +10,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import CropTool from "../../components/CropTool/CropTool";
+const fs = window.require("fs");
 
 const Edit = ({ image, onClose }) => {
   const [editedImage, setEditedImage] = useState(image.src);
@@ -175,6 +176,23 @@ const Edit = ({ image, onClose }) => {
     };
   };
 
+  const handleSave = () => {
+    // Extract base64 data from the edited image
+    const base64Data = editedImage.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, "base64");
+
+    // Save to the original file path (overwriting)
+    fs.writeFile(image.path, buffer, (err) => {
+      if (err) {
+        console.error("Failed to save edited image:", err);
+        // Optional: Show an error message to the user
+      } else {
+        onClose(); // Close the editor
+        // Optional: Trigger a refresh in the parent component
+      }
+    });
+  };
+
   return (
     <div className="edit-page">
       <div className="edit-panel">
@@ -206,7 +224,9 @@ const Edit = ({ image, onClose }) => {
             </div>
           )}
           <div>
-            <button className="primary-btn">Save</button>
+            <button className="primary-btn" onClick={handleSave}>
+              Save
+            </button>
             <button className="secondary-btn" onClick={onClose}>
               Cancel
             </button>
