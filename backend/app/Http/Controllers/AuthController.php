@@ -2,54 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use App\Http\Requests\CreateDataRequest;
-use App\Models\LoginHistory;
-use App\Models\User;
+use App\Services\LoginHistoryService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use App\Services\AuthService;
+use App\Models\LoginHistory;
+use App\Models\User;
 
 class AuthController extends Controller
 {
+    protected $authService;
+    protected $loginHistoryService;
+
+    public function __construct(AuthService $authService, LoginHistoryService $loginHistoryService)
+    {
+        $this->authService = $authService;
+        $this->loginHistoryService = $loginHistoryService;
+    }
+
     public function register(CreateDataRequest $request)
     {
-        $user = User::create([
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $token = JWTAuth::fromUser($user);
-
+        $token = $this->authService->registerUser($request);
         return $this->successResponse($token, 201);
     }
 
     public function login(CreateDataRequest $request)
     {
-        $credentials = $request->only('email', 'password');
+        $token = $this->authService->attemptLogin($request);
 
-        if (!$token = JWTAuth::attempt($credentials)) {
+        if (!$token) {
             return $this->errorResponse("Unauthorized", 401);
         }
 
-        $user = Auth::user();
-        $ip = $request->ip();
-
-        $loginData = [
-            'user_id' => $user->id,
-            'ip_address' => $ip,
-        ];
-
-        // Use frontend-provided coordinates if available
-        if ($request->has(['latitude', 'longitude'])) {
-            $loginData['latitude'] = $request->latitude;
-            $loginData['longitude'] = $request->longitude;
-        } else {
-            // Fallback to simple IP-based location
-            $loginData['geolocation'] = "IP: $ip";
-        }
-
-        LoginHistory::create($loginData);
+        $this->loginHistoryService->log(Auth::user(), $request);
 
         return $this->successResponse($token);
     }
