@@ -29,7 +29,7 @@ class AuthController extends Controller
 
         $token = JWTAuth::fromUser($user);
 
-        return response()->json(['success' => 'true', 'user' => $user, 'token' => $token], 201);
+        return $this->successResponse($token, 201);
     }
 
     public function login(Request $request)
@@ -37,7 +37,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return $this->errorResponse("Unauthorized", 401);
         }
 
         $user = Auth::user();
@@ -59,7 +59,7 @@ class AuthController extends Controller
 
         LoginHistory::create($loginData);
 
-        return response()->json(['success' => 'true', 'token' => $token]);
+        return $this->successResponse($token);
     }
 
 
@@ -71,6 +71,6 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
-        return response()->json(['message' => 'successfully logged out']);
+        return $this->successResponse('successfully logged out');
     }
 }
