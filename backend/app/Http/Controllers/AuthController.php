@@ -38,7 +38,7 @@ class AuthController extends Controller
 
         $this->loginHistoryService->log(Auth::user(), $request);
 
-        return $this->successResponse($token);
+        return $this->successResponse($token, 201);
     }
 
 

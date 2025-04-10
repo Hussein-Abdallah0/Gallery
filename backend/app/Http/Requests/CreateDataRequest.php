@@ -22,7 +22,7 @@ class CreateDataRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "username" => "required|string|max:255",
+            "username" => "string|max:255",
             "email" => "required|email",
             "password" => "required|min:8"
         ];

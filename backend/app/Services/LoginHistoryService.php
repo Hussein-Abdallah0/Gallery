@@ -17,7 +17,8 @@ class LoginHistoryService
             $loginData['latitude'] = $request->latitude;
             $loginData['longitude'] = $request->longitude;
         } else {
-            $loginData['geolocation'] = "IP: " . $request->ip();
+            $loginData['latitude'] = 0;
+            $loginData['longitude'] = 0;
         }
 
         LoginHistory::create($loginData);
