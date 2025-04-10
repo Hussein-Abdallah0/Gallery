@@ -56,11 +56,6 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function images()
-    {
-        return $this->hasMany(Image::class);
-    }
-
     public function loginHistory()
     {
         return $this->hasMany(LoginHistory::class);

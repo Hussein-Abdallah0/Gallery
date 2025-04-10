@@ -11,7 +11,11 @@
   --font-size-sm: 14px;
 
   --border-radius: 10px;
+}
+
+#root {
   height: 100%;
+  width: 100%;
 }
 
 * {
@@ -26,6 +30,11 @@
   color: var(--primary);
   font-size: 40px;
   margin: 50px;
+}
+
+html {
+  background-color: var(--tertiary-color);
+  height: 100%;
 }
 
 body {
@@ -49,6 +58,10 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   margin: 10px;
+}
+
+.flex {
+  display: flex;
 }
 
 .input {
@@ -77,6 +90,12 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin: 10px;
+}
+
+.secondary-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 /* Text Styles */
@@ -113,4 +132,15 @@ nav {
 body {
   height: 100%;
   width: 100%;
+}
+
+@media (max-width: 976px) {
+  .primary-btn {
+    width: 100px;
+    height: 40px;
+  }
+  .secondary-btn {
+    width: 100px;
+    height: 40px;
+  }
 }

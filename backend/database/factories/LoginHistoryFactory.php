@@ -21,7 +21,6 @@ class LoginHistoryFactory extends Factory
         return [
             'user_id' => User::inRandomOrder()->first()->id,
             'ip_address' => $this->faker->ipv4,
-            'geolocation' => $this->faker->city,
             'login_time' => now(),
         ];
     }

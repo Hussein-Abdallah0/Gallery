@@ -1,43 +1,25 @@
 import { Link } from "react-router-dom";
-import "./Sidebar.css";
-import {
-  LayoutDashboard,
-  SquareCheckBig,
-  HandCoins,
-  UserRound,
-  ScanEye,
-  NotebookText,
-  BookText,
-  Landmark,
-  Ambulance,
-  Clock8,
-} from "lucide-react";
+import { Heart, Images, Menu } from "lucide-react";
+import "./SideBar.css";
 
-const SideBar = ({ navItems = [] }) => {
-  const iconComponents = {
-    LayoutDashboard: <LayoutDashboard />,
-    SquareCheckBig: <SquareCheckBig />,
-    HandCoins: <HandCoins />,
-    UserRound: <UserRound />,
-    ScanEye: <ScanEye />,
-    NotebookText: <NotebookText />,
-    BookText: <BookText />,
-    Landmark: <Landmark />,
-    Ambulance: <Ambulance />,
-    Clock8: <Clock8 />,
-  };
-
+const SideBar = ({ collapsed, setCollapsed }) => {
   return (
-    <nav className="bg-primary">
-      <ul className="side-navbar-list">
-        <h1>hudgug</h1>
-        <li className="side-navbar-logo"></li>
-        {navItems.map((item, index) => (
-          <li key={index} className="side-navbar-element">
-            {iconComponents[item.icon]}
-            {item.to ? <Link to={item.to}>{item.label}</Link> : <span>{item.label}</span>}
-          </li>
-        ))}
+    <nav className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+      <div className="sidebar-logo">GALLERY</div>
+      <ul className="nav-links">
+        <Menu className="menu" onClick={() => setCollapsed(!collapsed)} />
+        <li>
+          <Link to="/home" className="nav-link">
+            <Images />
+            {!collapsed && <span className="link-text">Home</span>}
+          </Link>
+        </li>
+        <li>
+          <Link to="/" className="nav-link">
+            <Heart />
+            {!collapsed && <span className="link-text">Favorites</span>}
+          </Link>
+        </li>
       </ul>
     </nav>
   );
