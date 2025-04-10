@@ -2,64 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LoginHistory;
-use App\Models\User;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
+use App\Http\Requests\CreateDataRequest;
+use App\Services\LoginHistoryService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
-use Stevebauman\Location\Facades\Location;
+use App\Services\AuthService;
+
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    protected $authService;
+    protected $loginHistoryService;
+
+    public function __construct(AuthService $authService, LoginHistoryService $loginHistoryService)
     {
-        $request->validate([
-            'username' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-        ]);
-
-        $user = User::create([
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $token = JWTAuth::fromUser($user);
-
-        return response()->json(['success' => 'true', 'user' => $user, 'token' => $token], 201);
+        $this->authService = $authService;
+        $this->loginHistoryService = $loginHistoryService;
     }
 
-    public function login(Request $request)
+    public function register(CreateDataRequest $request)
     {
-        $credentials = $request->only('email', 'password');
+        $token = $this->authService->registerUser($request);
+        return $this->successResponse($token, 201);
+    }
 
-        if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+    public function login(CreateDataRequest $request)
+    {
+        $token = $this->authService->attemptLogin($request);
+
+        if (!$token) {
+            return $this->errorResponse("Unauthorized", 401);
         }
 
-        $user = Auth::user();
-        $ip = $request->ip();
+        $this->loginHistoryService->log(Auth::user(), $request);
 
-        $loginData = [
-            'user_id' => $user->id,
-            'ip_address' => $ip,
-        ];
-
-        // Use frontend-provided coordinates if available
-        if ($request->has(['latitude', 'longitude'])) {
-            $loginData['latitude'] = $request->latitude;
-            $loginData['longitude'] = $request->longitude;
-        } else {
-            // Fallback to simple IP-based location
-            $loginData['geolocation'] = "IP: $ip";
-        }
-
-        LoginHistory::create($loginData);
-
-        return response()->json(['success' => 'true', 'token' => $token]);
+        return $this->successResponse($token, 201);
     }
 
 
@@ -71,6 +47,6 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
-        return response()->json(['message' => 'successfully logged out']);
+        return $this->successResponse('successfully logged out');
     }
 }
