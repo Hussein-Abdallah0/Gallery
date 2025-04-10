@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateDataRequest;
 use App\Models\LoginHistory;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(CreateDataRequest $request)
     {
         $request->validate([
             'username' => 'required|string|max:255',
@@ -30,7 +30,7 @@ class AuthController extends Controller
         return $this->successResponse($token, 201);
     }
 
-    public function login(Request $request)
+    public function login(CreateDataRequest $request)
     {
         $credentials = $request->only('email', 'password');
 
