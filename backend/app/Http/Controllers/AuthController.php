@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use App\Http\Requests\CreateDataRequest;
 use App\Services\LoginHistoryService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use App\Services\AuthService;
-use App\Models\LoginHistory;
-use App\Models\User;
+
 
 class AuthController extends Controller
 {
