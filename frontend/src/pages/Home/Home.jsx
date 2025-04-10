@@ -93,7 +93,11 @@ const Home = () => {
       <div className="row">
         <h1 className="">Photos</h1>
         {isEditing && selectedImage && (
-          <Edit image={selectedImage} onClose={() => setIsEditing(false)} />
+          <Edit
+            image={selectedImage}
+            onClose={() => setIsEditing(false)}
+            reloadImages={loadImages}
+          />
         )}
         <div className="right">
           {selectedImage && (

@@ -12,7 +12,7 @@ import {
 import CropTool from "../../components/CropTool/CropTool";
 const fs = window.require("fs");
 
-const Edit = ({ image, onClose }) => {
+const Edit = ({ image, onClose, reloadImages }) => {
   const [editedImage, setEditedImage] = useState(image.src);
   const [watermarkText, setWatermarkText] = useState("");
   const [isWatermarking, setIsWatermarking] = useState(false);
@@ -187,6 +187,7 @@ const Edit = ({ image, onClose }) => {
         console.error("Failed to save edited image:", err);
         // Optional: Show an error message to the user
       } else {
+        reloadImages();
         onClose(); // Close the editor
         // Optional: Trigger a refresh in the parent component
       }
