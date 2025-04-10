@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "./Home.css";
 import Edit from "../Edit/Edit";
+import { useSelector, useDispatch } from "react-redux";
+import { setImages, setSelectedImage, setIsEditing } from "../../redux/imagesSlice";
 const fs = window.require("fs");
 const path = window.require("path");
 const os = window.require("os");
 
 const Home = () => {
-  const [images, setImages] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const { images, selectedImage, isEditing } = useSelector((state) => state.images);
+  const dispatch = useDispatch();
 
   const userHomeDir = os.homedir();
   const saveDir = path.join(userHomeDir, "ElectronPhotoApp", "user_images");
@@ -17,24 +18,17 @@ const Home = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Read the file
     const reader = new FileReader();
     reader.onload = function () {
       const arrayBuffer = this.result;
       const buffer = Buffer.from(arrayBuffer);
 
-      // Define the destination path
-      // const userHomeDir = os.homedir();
-      // const saveDir = path.join(userHomeDir, "ElectronPhotoApp", "user_images");
-
-      // Ensure directory exists
       if (!fs.existsSync(saveDir)) {
         fs.mkdirSync(saveDir, { recursive: true });
       }
 
       const savePath = path.join(saveDir, file.name);
 
-      // Save the image file
       fs.writeFile(savePath, buffer, (err) => {
         if (err) {
           console.error("Failed to save image:", err);
@@ -58,17 +52,17 @@ const Home = () => {
         const fullPath = path.join(saveDir, file);
         const imageBuffer = fs.readFileSync(fullPath);
         const base64 = imageBuffer.toString("base64");
-        const ext = path.extname(file).substring(1); // remove the dot
+        const ext = path.extname(file).substring(1);
         const dataUrl = `data:image/${ext};base64,${base64}`;
         imageList.push({ src: dataUrl, path: fullPath });
       }
     });
 
-    setImages(imageList);
+    dispatch(setImages(imageList));
   };
 
   const handleImageClick = (img) => {
-    setSelectedImage((prev) => (prev === img ? null : img)); // toggle
+    dispatch(setSelectedImage(selectedImage?.src === img.src ? null : img));
   };
 
   const handleDelete = () => {
@@ -77,7 +71,7 @@ const Home = () => {
         if (err) {
           console.error("Failed to delete image:", err);
         } else {
-          setSelectedImage(null);
+          dispatch(setSelectedImage(null));
           loadImages();
         }
       });
@@ -95,14 +89,14 @@ const Home = () => {
         {isEditing && selectedImage && (
           <Edit
             image={selectedImage}
-            onClose={() => setIsEditing(false)}
+            onClose={() => dispatch(setIsEditing(false))}
             reloadImages={loadImages}
           />
         )}
         <div className="right">
           {selectedImage && (
             <div className="edit-toolbar">
-              <button className="secondary-btn" onClick={() => setIsEditing(true)}>
+              <button className="secondary-btn" onClick={() => dispatch(setIsEditing(true))}>
                 Edit
               </button>
               <button className="delete-btn primary-btn" onClick={handleDelete}>
