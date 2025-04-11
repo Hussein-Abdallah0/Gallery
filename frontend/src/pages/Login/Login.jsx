@@ -1,17 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
 import { useAuthForm } from "../../hooks/useAuthForm";
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 const Login = () => {
+  const navigate = useNavigate();
   const { form, isSubmitting, error, handleChange, handleSubmit } = useAuthForm("login");
 
+  const onLoginSuccess = () => {
+    navigate("/home");
+  };
   return (
     <div className="body">
       <h1 className="logo">GALLERY</h1>
       <div className="login-section">
         <h1 className="header">Log In</h1>
         {error && <div className="error-message">{error}</div>}
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={(e) => handleSubmit(e, onLoginSuccess)}>
           <div className="login-input">
             <label htmlFor="email">Email</label>
             <input
