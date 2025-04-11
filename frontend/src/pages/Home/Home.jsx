@@ -1,86 +1,31 @@
-import React, { useEffect } from "react";
+import React from "react";
 import "./Home.css";
 import Edit from "../Edit/Edit";
 import { useSelector, useDispatch } from "react-redux";
-import { setImages, setSelectedImage, setIsEditing } from "../../redux/imagesSlice";
-const fs = window.require("fs");
-const path = window.require("path");
-const os = window.require("os");
+import { setSelectedImage, setIsEditing } from "../../redux/imagesSlice";
+import { deleteImage } from "../../services/fileService";
+import { useImageManager } from "../../hooks/useImageManager";
 
 const Home = () => {
   const { images, selectedImage, isEditing } = useSelector((state) => state.images);
   const dispatch = useDispatch();
-
-  const userHomeDir = os.homedir();
-  const saveDir = path.join(userHomeDir, "ElectronPhotoApp", "user_images");
-
-  const handleUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function () {
-      const arrayBuffer = this.result;
-      const buffer = Buffer.from(arrayBuffer);
-
-      if (!fs.existsSync(saveDir)) {
-        fs.mkdirSync(saveDir, { recursive: true });
-      }
-
-      const savePath = path.join(saveDir, file.name);
-
-      fs.writeFile(savePath, buffer, (err) => {
-        if (err) {
-          console.error("Failed to save image:", err);
-        } else {
-          loadImages();
-        }
-      });
-    };
-
-    reader.readAsArrayBuffer(file);
-  };
-
-  const loadImages = () => {
-    if (!fs.existsSync(saveDir)) return;
-
-    const files = fs.readdirSync(saveDir);
-    const imageList = [];
-
-    files.forEach((file) => {
-      if (/\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(file)) {
-        const fullPath = path.join(saveDir, file);
-        const imageBuffer = fs.readFileSync(fullPath);
-        const base64 = imageBuffer.toString("base64");
-        const ext = path.extname(file).substring(1);
-        const dataUrl = `data:image/${ext};base64,${base64}`;
-        imageList.push({ src: dataUrl, path: fullPath });
-      }
-    });
-
-    dispatch(setImages(imageList));
-  };
+  const { loadImages, handleUpload } = useImageManager();
 
   const handleImageClick = (img) => {
     dispatch(setSelectedImage(selectedImage?.src === img.src ? null : img));
   };
 
-  const handleDelete = () => {
-    if (selectedImage && selectedImage.path) {
-      fs.unlink(selectedImage.path, (err) => {
-        if (err) {
-          console.error("Failed to delete image:", err);
-        } else {
-          dispatch(setSelectedImage(null));
-          loadImages();
-        }
-      });
+  const handleDelete = async () => {
+    if (!selectedImage?.path) return;
+
+    try {
+      await deleteImage(selectedImage.path);
+      dispatch(setSelectedImage(null));
+      loadImages();
+    } catch (error) {
+      console.error("Failed to delete image:", error);
     }
   };
-
-  useEffect(() => {
-    loadImages();
-  }, []);
 
   return (
     <div className="photos">
