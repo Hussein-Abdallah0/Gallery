@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
-import { useImageCropper } from "../hooks/useImageCropper";
+import { useImageCropper } from "../../hooks/useImageCropper";
 import "./CropTool.css";
 
 const CropTool = ({ image, onCancel, onDone }) => {
