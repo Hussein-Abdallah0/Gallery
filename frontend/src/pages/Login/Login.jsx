@@ -1,61 +1,27 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axiosBaseUrl from "../../utils/axios";
+import { useAuthForm } from "../../hooks/useAuthForm";
 import "./Login.css";
 
 const Login = () => {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Fetch IP-based geolocation data
-      const locationRes = await fetch("https://ipapi.co/json");
-      const locationData = await locationRes.json();
-
-      // Add latitude and longitude to the form data
-      const loginData = {
-        ...form,
-        latitude: locationData.latitude,
-        longitude: locationData.longitude,
-      };
-
-      const response = await axiosBaseUrl.post("/login", loginData);
-
-      if (response.data.success) {
-        navigate("/home");
-      }
-    } catch (error) {
-      console.error("There was an error!", error);
-    }
-  };
+  const { form, isSubmitting, error, handleChange, handleSubmit } = useAuthForm("login");
 
   return (
     <div className="body">
       <h1 className="logo">GALLERY</h1>
-      {/* <img src="/logo.svg" alt="" /> */}
       <div className="login-section">
         <h1 className="header">Log In</h1>
-        <form className="login-form" id="loginForm" onSubmit={handleSubmit}>
+        {error && <div className="error-message">{error}</div>}
+        <form className="login-form" onSubmit={handleSubmit}>
           <div className="login-input">
             <label htmlFor="email">Email</label>
             <input
               className="input"
-              type="text"
+              type="email"
               id="email"
               name="email"
-              onChange={(e) => {
-                setForm({
-                  ...form,
-                  email: e.target.value,
-                });
-              }}
+              value={form.email}
+              onChange={handleChange}
+              required
             />
           </div>
 
@@ -66,23 +32,17 @@ const Login = () => {
               id="password"
               name="password"
               className="input"
-              onChange={(e) => {
-                setForm({
-                  ...form,
-                  password: e.target.value,
-                });
-              }}
+              value={form.password}
+              onChange={handleChange}
+              required
             />
           </div>
 
-          <input type="submit" value="Log In" className="primary-btn" />
+          <button type="submit" className="primary-btn" disabled={isSubmitting}>
+            {isSubmitting ? "Logging in..." : "Log In"}
+          </button>
         </form>
-        <button
-          className="secondary-btn"
-          onClick={() => {
-            navigate("/signup");
-          }}
-        >
+        <button className="secondary-btn" onClick={() => navigate("/signup")}>
           Sign Up
         </button>
       </div>
