@@ -25,6 +25,27 @@ export const useChat = () => {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await axiosBaseUrl.get("/global-messages");
+        const dbMessages = response.data.map((msg) => ({
+          user: msg.sender_name,
+          text: msg.content,
+          timestamp: msg.created_at,
+        }));
+        setMessages(dbMessages.reverse()); // reverse if using latest() in controller
+      } catch (err) {
+        console.error("Failed to fetch messages:", err);
+        setError("Failed to load messages");
+      }
+    };
+
+    if (user && user !== "Anonymous") {
+      fetchMessages();
+    }
+  }, [user]);
+
   // Initialize socket connection
   useEffect(() => {
     if (!user || user === "Anonymous") return;
@@ -50,19 +71,28 @@ export const useChat = () => {
     };
   }, [user]);
 
-  const sendMessage = useCallback(() => {
-    if (!input.trim() || !socket) return;
+  const sendMessage = useCallback(async () => {
+    if (!input.trim()) return;
 
-    const messageData = {
-      text: input,
-      user,
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      // Save to database
+      await axiosBaseUrl.post("/global-messages", {
+        sender_name: user,
+        content: input,
+      });
 
-    // Optimistic update
-    setMessages((prev) => [...prev, messageData]);
-    setInput("");
-    socket.emit("message", messageData);
+      // Broadcast via socket
+      const messageData = {
+        text: input,
+        user: user,
+        timestamp: new Date().toISOString(),
+      };
+
+      socket.emit("message", messageData);
+      setInput("");
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
   }, [input, socket, user]);
 
   return {
