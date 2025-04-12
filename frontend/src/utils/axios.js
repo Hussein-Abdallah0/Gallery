@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const token = localStorage.getItem("token");
+//using sessionStorage since localStorage is shared between windows
+const token = sessionStorage.getItem("token");
 
 const BaseURL = "http://127.0.0.1:8000";
 const Endpoint = "/api/v1";

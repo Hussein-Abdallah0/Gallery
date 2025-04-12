@@ -22,7 +22,8 @@ export const useAuthForm = (type = "login") => {
       const response = type === "login" ? await loginUser(form) : await registerUser(form);
 
       if (response?.success) {
-        localStorage.setItem("token", response.payload);
+        // localStorage.setItem("token", response.payload);
+        sessionStorage.setItem("token", response.payload);
         // console.log(response);
         onSuccess?.();
       }

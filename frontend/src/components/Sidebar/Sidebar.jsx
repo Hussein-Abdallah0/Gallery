@@ -27,7 +27,7 @@ const SideBar = ({ collapsed, setCollapsed }) => {
           </Link>
         </li> */}
         <li className="logout">
-          <Link to="/" className="nav-link" onClick={() => localStorage.removeItem("token")}>
+          <Link to="/" className="nav-link" onClick={() => sessionStorage.removeItem("token")}>
             <LogOut />
             {!collapsed && <span className="link-text">Logout</span>}
           </Link>

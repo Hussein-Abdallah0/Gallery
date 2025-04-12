@@ -4,6 +4,7 @@ import Login from "./pages/Login/Login";
 import Signup from "./pages/Signup/Signup";
 import WithoutSidebar from "./layouts/WithoutSidebar";
 import WithSidebar from "./layouts/WithSidebar";
+import Chat from "./pages/Chat/Chat";
 import "./App.css";
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
         {/* Routes WITH Sidebar */}
         <Route element={<WithSidebar />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/chat" element={<Chat />} />
+
           {/* Add more sidebar-wrapped routes here */}
         </Route>
       </Routes>

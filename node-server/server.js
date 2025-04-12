@@ -11,7 +11,8 @@ io.on("connection", (socket) => {
 
   socket.on("message", (data) => {
     console.log("Message:", data);
-    socket.broadcast.emit("message", data);
+    // socket.broadcast.emit("message", data);
+    io.emit("message", data);
   });
 
   socket.on("disconnect", () => {
@@ -19,7 +20,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 6001;
+const PORT = 8080;
 server.listen(PORT, () => {
   console.log(`Socket.io server running on http://localhost:${PORT}`);
 });
