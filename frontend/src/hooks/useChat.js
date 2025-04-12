@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { initializeSocket, setupSocketListeners } from "../services/socketService";
+import { initializeSocket, setupSocketListeners } from "../services/socketSerice";
 import axiosBaseUrl from "../utils/axios";
 
 export const useChat = () => {

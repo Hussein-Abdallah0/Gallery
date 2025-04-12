@@ -1,118 +1,51 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import io from "socket.io-client";
-import axiosBaseUrl from "../../utils/axios";
+import React from "react";
+import Message from "../../components/Message/Message";
+import { useChat } from "../../hooks/useChat";
+import "./Chat.css";
 
-function Chat() {
-  const [socket, setSocket] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [user, setUser] = useState("Anonymous");
-  const navigate = useNavigate();
+const Chat = () => {
+  const { messages, input, setInput, user, isLoading, error, sendMessage } = useChat();
 
-  // Initialize socket connection
-  useEffect(() => {
-    const newSocket = io("http://localhost:8080", {
-      auth: {
-        token: sessionStorage.getItem("token"),
-      },
-      transports: ["websocket"], // Force WebSocket transport
-      reconnectionAttempts: 5, // Retry up to 5 times
-      reconnectionDelay: 1000,
-    });
-
-    newSocket.on("connect_error", (err) => {
-      console.log("Connection Error:", err);
-    });
-
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axiosBaseUrl.get("/me");
-        setUser(response.data.username);
-      } catch (error) {
-        console.log(response);
-        console.error("Failed to fetch user:", error);
-      }
-    };
-    fetchUser();
-  }, [navigate]);
-
-  // Handle incoming messages
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleMessage = (data) => {
-      setMessages((prev) => [...prev, data]);
-    };
-
-    socket.on("message", handleMessage);
-
-    return () => {
-      socket.off("message", handleMessage);
-    };
-  }, [socket]);
-
-  // Send a message
-  const sendMessage = () => {
-    if (input.trim() && socket) {
-      const messageData = {
-        text: input,
-        user: user,
-        timestamp: new Date().toISOString(),
-      };
-
-      // Add message to local state immediately
-      setMessages((prev) => [...prev, messageData]);
-      setInput("");
-
-      // Then emit to server
-      socket.emit("message", messageData);
-    }
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") sendMessage();
   };
 
+  if (isLoading) return <div className="chat-loading">Loading chat...</div>;
+  if (error) return <div className="chat-error">{error}</div>;
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Global Chat</h2>
-      <div
-        style={{
-          height: "300px",
-          overflowY: "scroll",
-          border: "1px solid #ccc",
-          padding: "10px",
-          marginBottom: "10px",
-        }}
-      >
+    <div className="chat-container">
+      <h2 className="chat-header">Global Chat</h2>
+      <div className="messages-container">
         {messages.map((msg, i) => (
-          <div key={i} style={{ marginBottom: "5px" }}>
-            <strong>{msg.user}: </strong>
-            <span>{msg.text}</span>
-            <small style={{ color: "#666", marginLeft: "5px" }}>
-              {new Date(msg.timestamp).toLocaleTimeString()}
-            </small>
-          </div>
+          <Message
+            key={`${msg.timestamp}-${i}`}
+            user={msg.user}
+            text={msg.text}
+            timestamp={msg.timestamp}
+          />
         ))}
       </div>
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-        placeholder="Type a message..."
-        style={{ width: "70%", padding: "8px" }}
-      />
-      <button onClick={sendMessage} style={{ padding: "8px 15px", marginLeft: "5px" }}>
-        Send
-      </button>
+      <div className="message-input-container">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Type a message..."
+          className="message-input"
+          disabled={!user || user === "Anonymous"}
+        />
+        <button
+          onClick={sendMessage}
+          className="send-button"
+          disabled={!input.trim() || !user || user === "Anonymous"}
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
-}
+};
 
 export default Chat;
