@@ -11,17 +11,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class LoginHistoryFactory extends Factory
 {
     protected $model = LoginHistory::class;
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+
     public function definition(): array
     {
         return [
-            'user_id' => User::inRandomOrder()->first()->id,
+            'user_id' => User::factory(),
             'ip_address' => $this->faker->ipv4,
-            'login_time' => now(),
+            'latitude' => $this->faker->latitude,
+            'longitude' => $this->faker->longitude,
         ];
     }
 }
