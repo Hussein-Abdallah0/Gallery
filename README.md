@@ -74,39 +74,27 @@ JWT_SECRET=pJrp4ESHr8mTpBYsQbo2gcTpyu7ZSE3rsTKw4PMvPSA7dQK9DmFHpHc0BvGITYoT
 JWT_ALGO=HS256
 Generate application key:
 
-bash
-Copy
 php artisan key:generate
 Run database migrations:
 
-bash
-Copy
 php artisan migrate
 Running the Application
 Development Mode
 Start the Laravel backend:
 
-bash
-Copy
 cd server
 php artisan serve
 Start the Electron app:
 
-bash
-Copy
 cd client
 npm start
 Start the WebSocket server (for chat):
 
-bash
-Copy
 cd websocket-server
 node server.js
 Production Build
 To create a production build of the Electron app:
 
-bash
-Copy
 cd client
 npm run build
 CI/CD Pipeline
@@ -121,6 +109,4 @@ Automated deployment (configured in .github/workflows/laravel.yml)
 Testing
 Run Laravel tests with:
 
-bash
-Copy
 php artisan test
