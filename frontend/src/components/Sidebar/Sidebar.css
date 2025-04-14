@@ -1,4 +1,6 @@
 .sidebar {
+  display: flex;
+  flex-direction: column;
   width: 250px;
   height: 100vh;
   background-color: var(--secondary);
@@ -19,7 +21,11 @@
 }
 
 .nav-links {
+  display: flex;
+  flex-direction: column;
   list-style: none;
+  /* background-color: black; */
+  height: 100%;
 }
 
 .nav-link {
@@ -73,4 +79,10 @@
   color: var(--primary);
   margin-left: 13px;
   margin-bottom: 20px;
+}
+
+.logout {
+  /* align-self: flex-end; */
+  justify-self: end;
+  margin-top: auto;
 }

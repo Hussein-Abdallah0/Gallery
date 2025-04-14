@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Heart, Images, Menu } from "lucide-react";
+import { Heart, Images, LogOut, Menu, MessageSquare } from "lucide-react";
 import "./SideBar.css";
 
 const SideBar = ({ collapsed, setCollapsed }) => {
@@ -15,9 +15,21 @@ const SideBar = ({ collapsed, setCollapsed }) => {
           </Link>
         </li>
         <li>
+          <Link to="/chat" className="nav-link">
+            <MessageSquare />
+            {!collapsed && <span className="link-text">Chat</span>}
+          </Link>
+        </li>
+        {/* <li>
           <Link to="/" className="nav-link">
             <Heart />
             {!collapsed && <span className="link-text">Favorites</span>}
+          </Link>
+        </li> */}
+        <li className="logout">
+          <Link to="/" className="nav-link" onClick={() => sessionStorage.removeItem("token")}>
+            <LogOut />
+            {!collapsed && <span className="link-text">Logout</span>}
           </Link>
         </li>
       </ul>
