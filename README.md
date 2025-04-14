@@ -72,32 +72,39 @@ DB_PASSWORD=
 
 JWT_SECRET=pJrp4ESHr8mTpBYsQbo2gcTpyu7ZSE3rsTKw4PMvPSA7dQK9DmFHpHc0BvGITYoT
 JWT_ALGO=HS256
+
 Generate application key:
 
 php artisan key:generate
+
 Run database migrations:
 
 php artisan migrate
 Running the Application
 Development Mode
+
 Start the Laravel backend:
 
 cd server
 php artisan serve
+
 Start the Electron app:
 
 cd client
 npm start
+
 Start the WebSocket server (for chat):
 
 cd websocket-server
 node server.js
 Production Build
+
 To create a production build of the Electron app:
 
 cd client
 npm run build
 CI/CD Pipeline
+
 The project includes a GitHub Actions workflow for:
 
 Running PHPUnit tests
