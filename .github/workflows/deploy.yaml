@@ -69,23 +69,23 @@ jobs:
           tags: ${{ env.DOCKER_IMAGE }}:latest
 
       - name: Deploy to server
-  uses: appleboy/ssh-action@master
-  with:
-    host: ${{ secrets.SSH_HOST }}
-    username: ${{ secrets.SSH_USERNAME }}
-    key: ${{ secrets.SSH_KEY }}
-    script: |
-      # Ensure directory exists and has correct permissions
-      sudo mkdir -p /var/www/gallery
-      sudo chown -R $USER:$USER /var/www/gallery
-      cd /var/www/gallery
+    uses: appleboy/ssh-action@master
+    with:
+      host: ${{ secrets.SSH_HOST }}
+      username: ${{ secrets.SSH_USERNAME }}
+      key: ${{ secrets.SSH_KEY }}
+      script: |
+        # Ensure directory exists and has correct permissions
+        sudo mkdir -p /var/www/gallery
+        sudo chown -R $USER:$USER /var/www/gallery
+        cd /var/www/gallery
 
-      # Pull the latest Docker image
-      docker pull ${{ env.DOCKER_IMAGE }}:latest
+        # Pull the latest Docker image
+        docker pull ${{ env.DOCKER_IMAGE }}:latest
 
-      # Stop existing containers (if any) and start new ones
-      docker compose down || true  # Ignore error if no containers exist
-      docker compose up -d
+        # Stop existing containers (if any) and start new ones
+        docker compose down || true  # Ignore error if no containers exist
+        docker compose up -d
 
-      # Run migrations 
-      docker exec laravel_server php artisan migrate --force
+        # Run migrations 
+        docker exec laravel_server php artisan migrate --force
