@@ -92,18 +92,11 @@ jobs:
             sudo chown -R $USER:$USER /var/www/gallery
             cd /var/www/gallery
 
-            # Download artifact directly
-            curl -sL \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" \
-              | grep -o '"archive_download_url": "[^"]*' | grep -o '[^"]*$' \
-              | head -1 | xargs curl -sL -o deploy.zip -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
-
-            unzip deploy.zip
+            # Download artifact using GitHub CLI
+            gh run download ${{ github.run_id }} -n deploy-package -D .
             tar -xzvf deploy.tar.gz
             cp deploy_files/* .
-            rm -rf deploy_files deploy.tar.gz deploy.zip
+            rm -rf deploy_files deploy.tar.gz
 
             # Deploy containers
             docker pull ${{ env.DOCKER_IMAGE }}:latest
