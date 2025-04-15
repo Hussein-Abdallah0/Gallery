@@ -75,17 +75,24 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Ensure directory exists and has correct permissions
+            # Set up directory
             sudo mkdir -p /var/www/gallery
             sudo chown -R $USER:$USER /var/www/gallery
             cd /var/www/gallery
 
-            # Pull the latest Docker image
+            # Copy necessary files from repository
+            git clone https://github.com/Hussein-Abdallah0/Gallery.git . || true
+            cp -f /tmp/workspace/docker-compose.yml ./
+
+            # Pull and start containers
             docker pull ${{ env.DOCKER_IMAGE }}:latest
+            docker compose down || true
+            docker compose up -d --wait
 
-            # Stop existing containers (if any) and start new ones
-            docker compose down || true  # Ignore error if no containers exist
-            docker compose up -d
+            # Wait for Laravel container to be ready
+            until docker ps --filter "name=laravel_server" --format '{{.Status}}' | grep -q "Up"; do
+              sleep 5
+            done
 
-            # Run migrations 
+            # Run migrations
             docker exec laravel_server php artisan migrate --force
