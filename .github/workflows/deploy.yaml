@@ -69,37 +69,23 @@ jobs:
           tags: ${{ env.DOCKER_IMAGE }}:latest
 
       - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            # Check if docker is installed
-            if ! command -v docker &> /dev/null; then
-                echo "Docker not found, installing..."
-                sudo apt-get update
-                sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-                sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-                sudo apt-get update
-                sudo apt-get install -y docker-ce
-                sudo usermod -aG docker $USER
-            fi
+  uses: appleboy/ssh-action@master
+  with:
+    host: ${{ secrets.SSH_HOST }}
+    username: ${{ secrets.SSH_USERNAME }}
+    key: ${{ secrets.SSH_KEY }}
+    script: |
+      # Ensure directory exists and has correct permissions
+      sudo mkdir -p /var/www/gallery
+      sudo chown -R $USER:$USER /var/www/gallery
+      cd /var/www/gallery
 
-            # Check if docker-compose is installed
-            if ! command -v docker-compose &> /dev/null; then
-                echo "Docker Compose not found, installing..."
-                sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-                sudo chmod +x /usr/local/bin/docker-compose
-            fi
+      # Pull the latest Docker image
+      docker pull ${{ env.DOCKER_IMAGE }}:latest
 
-            # Create directory if it doesn't exist
-            mkdir -p /var/www/gallery
-            cd /var/www/gallery
+      # Stop existing containers (if any) and start new ones
+      docker compose down || true  # Ignore error if no containers exist
+      docker compose up -d
 
-            # Pull and run the application
-            docker pull ${{ env.DOCKER_IMAGE }}:latest
-            docker-compose down
-            docker-compose up -d
-            docker exec laravel_server php artisan migrate --force
+      # Run migrations
+      docker exec laravel_server php artisan migrate --force
