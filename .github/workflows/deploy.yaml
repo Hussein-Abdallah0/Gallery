@@ -81,7 +81,7 @@ jobs:
             cd /var/www/gallery
 
             # Copy necessary files from repository
-            git clone https://github.com/yourusername/your-repo.git . || true
+            git clone https://github.com/Hussein-Abdallah0/Gallery.git . || true
             cp -f /tmp/workspace/docker-compose.yml ./
 
             # Pull and start containers
