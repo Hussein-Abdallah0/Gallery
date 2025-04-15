@@ -87,5 +87,5 @@ jobs:
       docker compose down || true  # Ignore error if no containers exist
       docker compose up -d
 
-      # Run migrations
+      # Run migrations 
       docker exec laravel_server php artisan migrate --force
