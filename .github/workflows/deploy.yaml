@@ -41,15 +41,22 @@ jobs:
             docker stop laravel_server || true
             docker rm laravel_server || true
 
+            # Create necessary directories for Laravel
+            mkdir -p /var/www/html/storage
+            mkdir -p /var/www/html/storage/framework/{cache,sessions,views}
+            mkdir -p /var/www/html/storage/logs
+
             # Pull the latest image
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-app:latest
 
-            # Run the new container
+            # Run the new container with proper permissions
             docker run -d \
               --name laravel_server \
               -p 8000:80 \
+              -v /var/www/html/storage:/var/www/html/storage \
               -e APP_ENV=production \
-              -e APP_DEBUG=false \
+              -e APP_DEBUG=true \
+              -e LOG_CHANNEL=stderr \
               -e DB_HOST=${{ secrets.DB_HOST }} \
               -e DB_DATABASE=${{ secrets.DB_DATABASE }} \
               -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
@@ -57,5 +64,32 @@ jobs:
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
               ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-app:latest
 
-            # Clean up unused images
-            docker image prune -af
+            # Wait for container to initialize
+            sleep 15
+
+            # Set proper permissions (executed inside container)
+            docker exec laravel_server chown -R www-data:www-data /var/www/html/storage
+            docker exec laravel_server chmod -R 775 /var/www/html/storage
+
+            # Generate Laravel application key if missing
+            docker exec laravel_server php artisan key:generate --force || true
+
+            # Run database migrations
+            docker exec laravel_server php artisan migrate --force || true
+
+            # Clear caches
+            docker exec laravel_server php artisan config:clear
+            docker exec laravel_server php artisan cache:clear
+            docker exec laravel_server php artisan view:clear
+
+            # Check container status
+            echo "Container status:"
+            docker ps -a
+
+            # Check application health
+            echo "Application health check:"
+            curl -I http://localhost:8000 || true
+
+            # Check logs for errors
+            echo "Last 50 lines of logs:"
+            docker logs laravel_server --tail 50
