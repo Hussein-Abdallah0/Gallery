@@ -12,6 +12,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Run PHPUnit Tests
+        run: |
+          cd backend
+          composer install
+          php artisan key:generate
+          php artisan config:clear
+          php artisan test
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -43,9 +51,7 @@ jobs:
 
             # Create and prepare storage directory structure
             sudo mkdir -p /var/www/html/storage
-            sudo mkdir -p /var/www/html/storage/framework/cache
-            sudo mkdir -p /var/www/html/storage/framework/sessions
-            sudo mkdir -p /var/www/html/storage/framework/views
+            sudo mkdir -p /var/www/html/storage/framework/{cache,sessions,views}
             sudo mkdir -p /var/www/html/storage/logs
             sudo chmod -R 777 /var/www/html/storage
 
@@ -59,6 +65,7 @@ jobs:
               -v /var/www/html/storage:/var/www/html/storage \
               -e APP_ENV=production \
               -e APP_DEBUG=true \
+              -e APP_KEY=base64:${{ secrets.APP_KEY }} \
               -e LOG_CHANNEL=stderr \
               -e DB_HOST=${{ secrets.DB_HOST }} \
               -e DB_DATABASE=${{ secrets.DB_DATABASE }} \
@@ -68,28 +75,24 @@ jobs:
               ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-app:latest
 
             # Wait for container to initialize
-            sleep 10
+            sleep 15
 
-            # Set proper permissions inside container
+            # Generate application key if not passed via env
+            docker exec laravel_server bash -c "[ -z \"$APP_KEY\" ] && php artisan key:generate --force || true"
+
+            # Set proper permissions
             docker exec laravel_server chown -R www-data:www-data /var/www/html/storage
             docker exec laravel_server chmod -R 775 /var/www/html/storage
             docker exec laravel_server chmod -R 775 /var/www/html/bootstrap/cache
 
-            # Generate Laravel application key if missing
-            docker exec laravel_server php artisan key:generate --force || true
+            # Run database migrations
+            docker exec laravel_server php artisan migrate --force || true
 
             # Clear and cache configurations
             docker exec laravel_server php artisan config:clear
             docker exec laravel_server php artisan config:cache
             docker exec laravel_server php artisan view:clear
-            docker exec laravel_server php artisan view:cache
             docker exec laravel_server php artisan route:clear
-            docker exec laravel_server php artisan route:cache
-
-            # Check storage permissions
-            echo "Storage permissions:"
-            docker exec laravel_server ls -la /var/www/html/storage
-            docker exec laravel_server ls -la /var/www/html/storage/framework
 
             # Check container status
             echo "Container status:"
@@ -99,6 +102,6 @@ jobs:
             echo "Application health check:"
             curl -I http://localhost:8000 || true
 
-            # Check logs for errors
+            # Check logs
             echo "Last 50 lines of logs:"
             docker logs laravel_server --tail 50
