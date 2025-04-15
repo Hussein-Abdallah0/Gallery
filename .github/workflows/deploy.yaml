@@ -85,6 +85,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            cd /var/www/gallery
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-gallery:latest
             docker-compose down
             docker-compose up -d
