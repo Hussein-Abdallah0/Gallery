@@ -3,11 +3,9 @@ name: Deploy Gallery Backend
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 env:
-  DOCKER_IMAGE: yourdockerhubusername/gallery-backend
+  DOCKER_IMAGE: Hussein-Abdallah0/gallery-server
 
 jobs:
   test:
@@ -16,7 +14,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: 1234
           MYSQL_DATABASE: gallerydb
         ports:
           - 3306:3306
@@ -44,7 +42,8 @@ jobs:
           sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/g' .env
           sed -i 's/DB_DATABASE=gallerydb/DB_DATABASE=gallerydb/g' .env
           sed -i 's/DB_USERNAME=root/DB_USERNAME=root/g' .env
-          sed -i 's/DB_PASSWORD=/DB_PASSWORD=password/g' .env
+          sed -i 's/DB_PASSWORD=/DB_PASSWORD=1234/g' .env
+          sed -i 's/JWT_SECRET=/JWT_SECRET=pJrp4ESHr8mTpBYsQbo2gcTpyu7ZSE3rsTKw4PMvPSA7dQK9DmFHpHc0BvGITYoT/g' .env
 
       - name: Generate app key
         run: php artisan key:generate --env=testing
@@ -66,7 +65,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build and push backend image
+      - name: Build and push server image
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -81,10 +80,20 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            # Stop and remove all containers
+            docker stop laravel_server mysql_db gallery_websocket || true
+            docker rm laravel_server mysql_db gallery_websocket || true
+
+            # Pull the new image
             docker pull ${{ env.DOCKER_IMAGE }}:latest
-            cd /path/to/your/project
+
+            # Recreate containers using docker-compose
+            cd /path/to/your/project  # Replace with your actual project path
             docker-compose down
             docker-compose up -d
-            docker exec gallery_backend php artisan migrate --force
-            docker exec gallery_backend php artisan config:cache
-            docker exec gallery_backend php artisan route:cache
+
+            # Run Laravel maintenance commands
+            docker exec laravel_server php artisan migrate --force
+            docker exec laravel_server php artisan config:clear
+            docker exec laravel_server php artisan cache:clear
+            docker exec laravel_server php artisan route:cache
