@@ -41,10 +41,13 @@ jobs:
             docker stop laravel_server || true
             docker rm laravel_server || true
 
-            # Create necessary directories for Laravel
-            mkdir -p /var/www/html/storage
-            mkdir -p /var/www/html/storage/framework/{cache,sessions,views}
-            mkdir -p /var/www/html/storage/logs
+            # Create and prepare storage directory structure
+            sudo mkdir -p /var/www/html/storage
+            sudo mkdir -p /var/www/html/storage/framework/cache
+            sudo mkdir -p /var/www/html/storage/framework/sessions
+            sudo mkdir -p /var/www/html/storage/framework/views
+            sudo mkdir -p /var/www/html/storage/logs
+            sudo chmod -R 777 /var/www/html/storage
 
             # Pull the latest image
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-app:latest
@@ -65,22 +68,28 @@ jobs:
               ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-app:latest
 
             # Wait for container to initialize
-            sleep 15
+            sleep 10
 
-            # Set proper permissions (executed inside container)
+            # Set proper permissions inside container
             docker exec laravel_server chown -R www-data:www-data /var/www/html/storage
             docker exec laravel_server chmod -R 775 /var/www/html/storage
+            docker exec laravel_server chmod -R 775 /var/www/html/bootstrap/cache
 
             # Generate Laravel application key if missing
             docker exec laravel_server php artisan key:generate --force || true
 
-            # Run database migrations
-            docker exec laravel_server php artisan migrate --force || true
-
-            # Clear caches
+            # Clear and cache configurations
             docker exec laravel_server php artisan config:clear
-            docker exec laravel_server php artisan cache:clear
+            docker exec laravel_server php artisan config:cache
             docker exec laravel_server php artisan view:clear
+            docker exec laravel_server php artisan view:cache
+            docker exec laravel_server php artisan route:clear
+            docker exec laravel_server php artisan route:cache
+
+            # Check storage permissions
+            echo "Storage permissions:"
+            docker exec laravel_server ls -la /var/www/html/storage
+            docker exec laravel_server ls -la /var/www/html/storage/framework
 
             # Check container status
             echo "Container status:"
