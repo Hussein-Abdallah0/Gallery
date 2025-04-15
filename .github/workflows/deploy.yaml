@@ -4,21 +4,55 @@ on:
   push:
     branches: [main]
 
-jobs:
-  Build-Laravel-And-Push-Dockerhub:
-    runs-on: ubuntu-latest
+env:
+  APP_ENV: testing
+  DB_CONNECTION: sqlite
+  DB_DATABASE: ":memory:"
 
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, ctype, xml, dom, fileinfo, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          composer install --prefer-dist --no-interaction
+
+      - name: Generate env file for testing
+        run: |
+          cd backend
+          cp .env.example .env.testing
+          echo "APP_KEY=base64:testkey123456789012345678901234567890" >> .env.testing
+          echo "APP_ENV=testing" >> .env.testing
+          echo "DB_CONNECTION=sqlite" >> .env.testing
+          echo "DB_DATABASE=:memory:" >> .env.testing
+          echo "CACHE_DRIVER=array" >> .env.testing
+          echo "SESSION_DRIVER=array" >> .env.testing
+          echo "QUEUE_DRIVER=sync" >> .env.testing
+          echo "JWT_SECRET=testsecret123456789012345678901234567890" >> .env.testing
+
+      - name: Run tests
+        run: |
+          cd backend
+          php artisan config:clear
+          php artisan test --env=testing
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Run PHPUnit Tests
-        run: |
-          cd backend
-          composer install
-          php artisan key:generate
-          php artisan config:clear
-          php artisan test
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -32,11 +66,6 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-app:latest
 
-  Deploy-Laravel-Docker:
-    needs: Build-Laravel-And-Push-Dockerhub
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -64,7 +93,7 @@ jobs:
               -p 8000:80 \
               -v /var/www/html/storage:/var/www/html/storage \
               -e APP_ENV=production \
-              -e APP_DEBUG=true \
+              -e APP_DEBUG=false \
               -e APP_KEY=base64:${{ secrets.APP_KEY }} \
               -e LOG_CHANNEL=stderr \
               -e DB_HOST=${{ secrets.DB_HOST }} \
@@ -76,9 +105,6 @@ jobs:
 
             # Wait for container to initialize
             sleep 15
-
-            # Generate application key if not passed via env
-            docker exec laravel_server bash -c "[ -z \"$APP_KEY\" ] && php artisan key:generate --force || true"
 
             # Set proper permissions
             docker exec laravel_server chown -R www-data:www-data /var/www/html/storage
