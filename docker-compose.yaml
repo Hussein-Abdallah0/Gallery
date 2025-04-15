@@ -1,28 +1,37 @@
-# version: '3.8'
-
-# if you are getting a table not found error use this in command line
-# docker-compose exec server php artisan migrate
+version: "3.8"
 
 services:
   server:
     build:
-      context: ./
+      context: .
       dockerfile: Dockerfile
     container_name: laravel_server
-    volumes:
-      - ./backend:/var/www/html
-      - ./backend/storage:/var/www/html/storage
     environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
       - DB_HOST=database
       - DB_DATABASE=gallerydb
       - DB_USERNAME=root
       - DB_PASSWORD=1234
-      - DB_PORT=3306
-    restart: always
+      - JWT_SECRET=pJrp4ESHr8mTpBYsQbo2gcTpyu7ZSE3rsTKw4PMvPSA7dQK9DmFHpHc0BvGITYoT
     ports:
-      - 8000:80
+      - "8000:80"
     depends_on:
       - database
+      - websocket
+    volumes:
+      - ./backend/storage:/var/www/html/storage # Only mount storage for development
+
+  websocket:
+    build:
+      context: ./node-server
+    container_name: gallery_websocket
+    ports:
+      - "6001:6001"
+    volumes:
+      - ./node-server:/app
+    environment:
+      - NODE_ENV=development
 
   database:
     image: mysql:8.0
@@ -34,5 +43,10 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
 volumes:
   db_data:
