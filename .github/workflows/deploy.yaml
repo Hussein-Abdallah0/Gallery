@@ -85,7 +85,56 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            # Create directory if it doesn't exist
+            sudo mkdir -p /var/www/gallery
+            sudo chown -R ubuntu:ubuntu /var/www/gallery
+
+            # Navigate to directory
             cd /var/www/gallery
+
+            # Stop and remove any existing containers
+            docker-compose -f docker-compose.yml down || true
+
+            # Pull latest image
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-gallery:latest
-            docker-compose down
-            docker-compose up -d
+
+            # Copy compose file from repository
+            cat << 'EOF' > docker-compose.yml
+            version: "3.8"
+            services:
+              server:
+                image: ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-gallery:latest
+                container_name: laravel_server
+                environment:
+                  - APP_ENV=production
+                  - APP_DEBUG=false
+                  - DB_HOST=database
+                  - DB_DATABASE=gallerydb
+                  - DB_USERNAME=root
+                  - DB_PASSWORD=1234
+                  - JWT_SECRET=pJrp4ESHr8mTpBYsQbo2gcTpyu7ZSE3rsTKw4PMvPSA7dQK9DmFHpHc0BvGITYoT
+                ports:
+                  - "8000:80"
+                depends_on:
+                  - database
+                volumes:
+                  - laravel_storage:/var/www/html/storage
+
+              database:
+                image: mysql:8.0
+                container_name: mysql_db
+                environment:
+                  - MYSQL_ROOT_PASSWORD=1234
+                  - MYSQL_DATABASE=gallerydb
+                ports:
+                  - "3306:3306"
+                volumes:
+                  - db_data:/var/lib/mysql
+
+            volumes:
+              db_data:
+              laravel_storage:
+            EOF
+
+            # Start containers
+            docker-compose -f docker-compose.yml up -d
