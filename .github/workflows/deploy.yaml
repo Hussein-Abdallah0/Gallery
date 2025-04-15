@@ -92,13 +92,13 @@ jobs:
             sudo chown -R $USER:$USER /var/www/gallery
             cd /var/www/gallery
 
-            # Download and extract deployment package
+            # Download artifact directly
             curl -sL \
               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -H "Accept: application/vnd.github.v3+json" \
               "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" \
-              | jq -r '.artifacts[0].archive_download_url' \
-              | xargs curl -sL -o deploy.zip
+              | grep -o '"archive_download_url": "[^"]*' | grep -o '[^"]*$' \
+              | head -1 | xargs curl -sL -o deploy.zip -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
 
             unzip deploy.zip
             tar -xzvf deploy.tar.gz
