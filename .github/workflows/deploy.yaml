@@ -29,29 +29,27 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # Cleanup previous deployment
+            # Stop and remove old container
             docker stop laravel_server || true
             docker rm laravel_server || true
 
-            # Create storage structure with correct permissions
+            # Create storage directories
             sudo mkdir -p /var/www/html/storage
             sudo mkdir -p /var/www/html/storage/framework/{cache,sessions,views}
             sudo mkdir -p /var/www/html/storage/logs
-            sudo chown -R 1000:1000 /var/www/html/storage
             sudo chmod -R 777 /var/www/html/storage
 
-            # Pull new image
+            # Pull the image
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-app:latest
 
-            # Run container with production settings
+            # Run new container
             docker run -d \
               --name laravel_server \
               -p 8000:80 \
               -v /var/www/html/storage:/var/www/html/storage \
               -e APP_ENV=production \
-              -e APP_DEBUG=true \  # Temporarily enable debug for troubleshooting
+              -e APP_DEBUG=false \
               -e APP_KEY=base64:${{ secrets.APP_KEY }} \
-              -e LOG_CHANNEL=daily \
               -e DB_HOST=${{ secrets.DB_HOST }} \
               -e DB_DATABASE=${{ secrets.DB_DATABASE }} \
               -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
@@ -59,30 +57,18 @@ jobs:
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
               ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-app:latest
 
-            # Wait for container to initialize
-            sleep 30
+            # Wait for startup
+            sleep 15
 
-            # Execute critical setup commands
-            docker exec laravel_server bash -c "
-              mkdir -p /var/www/html/storage/logs
-              touch /var/www/html/storage/logs/laravel.log
-              chown -R www-data:www-data /var/www/html/storage
-              chmod -R 775 /var/www/html/storage
-              chown -R www-data:www-data /var/www/html/bootstrap/cache
-              php artisan config:clear
-              php artisan cache:clear
-              php artisan view:clear
-              php artisan route:clear
-              php artisan optimize
-              php artisan migrate --force
-            "
+            # Run migrations and optimize
+            docker exec laravel_server php artisan migrate --force
+            docker exec laravel_server php artisan optimize
+
+            # Fix permissions
+            docker exec laravel_server chown -R www-data:www-data /var/www/html/storage
+            docker exec laravel_server chmod -R 775 /var/www/html/storage
 
             # Verify deployment
-            echo "=== Checking Application Status ==="
-            docker exec laravel_server ls -la /var/www/html/storage/logs/
+            echo "=== Deployment Checks ==="
             docker exec laravel_server php artisan route:list
-            docker exec laravel_server php artisan --version
-            echo "=== Apache Error Log ==="
-            docker exec laravel_server tail -n 50 /var/log/apache2/error.log || echo "Could not access error logs"
-            echo "=== Laravel Log ==="
-            docker exec laravel_server tail -n 50 /var/www/html/storage/logs/laravel.log || echo "Could not access laravel logs"
+            curl -I http://localhost:8000 || echo "Local check failed"
