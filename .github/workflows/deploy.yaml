@@ -75,7 +75,7 @@ jobs:
           tar -czvf deploy.tar.gz deploy_files/
 
       - name: Upload deployment package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: deploy-package
           path: deploy.tar.gz
@@ -92,11 +92,17 @@ jobs:
             sudo chown -R $USER:$USER /var/www/gallery
             cd /var/www/gallery
 
-            # Download artifact using GitHub CLI
-            gh run download ${{ github.run_id }} -n deploy-package -D .
+            # Download artifact using direct URL
+            curl -sL \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" \
+              | grep -o '"archive_download_url": "[^"]*' | cut -d'"' -f4 \
+              | head -1 | xargs curl -sL -o deploy.zip -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
+
+            unzip deploy.zip
             tar -xzvf deploy.tar.gz
             cp deploy_files/* .
-            rm -rf deploy_files deploy.tar.gz
+            rm -rf deploy_files deploy.tar.gz deploy.zip
 
             # Deploy containers
             docker pull ${{ env.DOCKER_IMAGE }}:latest
