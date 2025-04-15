@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  DOCKER_IMAGE: Hussein-Abdallah0/gallery-server
+  DOCKER_IMAGE: docker.io/husseinabdallah02/gallery-server
 
 jobs:
   test:
@@ -38,15 +38,11 @@ jobs:
         run: |
           cd backend
           cp .env.example .env
-          sed -i 's/APP_ENV=local/APP_ENV=testing/g' .env
-          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/g' .env
-          sed -i 's/DB_DATABASE=gallerydb/DB_DATABASE=gallerydb/g' .env
-          sed -i 's/DB_USERNAME=root/DB_USERNAME=root/g' .env
           sed -i 's/DB_PASSWORD=/DB_PASSWORD=1234/g' .env
           sed -i 's/JWT_SECRET=/JWT_SECRET=pJrp4ESHr8mTpBYsQbo2gcTpyu7ZSE3rsTKw4PMvPSA7dQK9DmFHpHc0BvGITYoT/g' .env
 
       - name: Generate app key
-        run: php artisan key:generate --env=testing
+        run: php artisan key:generate
         working-directory: ./backend
 
       - name: Execute tests
@@ -62,38 +58,25 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }} # Should be 'husseinabdallah02'
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build and push server image
+      - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:latest
 
-      - name: Deploy to production
+      - name: Deploy to server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
           script: |
-            # Stop and remove all containers
-            docker stop laravel_server mysql_db gallery_websocket || true
-            docker rm laravel_server mysql_db gallery_websocket || true
-
-            # Pull the new image
             docker pull ${{ env.DOCKER_IMAGE }}:latest
-
-            # Recreate containers using docker-compose
-            cd /path/to/your/project  # Replace with your actual project path
+            cd /path/to/your/project
             docker-compose down
             docker-compose up -d
-
-            # Run Laravel maintenance commands
             docker exec laravel_server php artisan migrate --force
-            docker exec laravel_server php artisan config:clear
-            docker exec laravel_server php artisan cache:clear
-            docker exec laravel_server php artisan route:cache
