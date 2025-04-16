@@ -71,71 +71,71 @@ jobs:
         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-gallery:latest
 
   deploy:
-  needs: build-and-push
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        port: ${{ secrets.SSH_PORT }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        script: |
-          # Create directory if it doesn't exist
-          sudo mkdir -p /var/www/gallery
-          sudo chown -R ubuntu:ubuntu /var/www/gallery
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Create directory if it doesn't exist
+            sudo mkdir -p /var/www/gallery
+            sudo chown -R ubuntu:ubuntu /var/www/gallery
 
-          # Navigate to directory
-          cd /var/www/gallery
+            # Navigate to directory
+            cd /var/www/gallery
 
-          # Forcefully remove any existing containers and volumes
-          docker rm -f laravel_server mysql_db || true
-          docker volume rm gallery_db_data gallery_laravel_storage || true
+            # Forcefully remove any existing containers and volumes
+            docker rm -f laravel_server mysql_db || true
+            docker volume rm gallery_db_data gallery_laravel_storage || true
 
-          # Pull latest image
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-gallery:latest
+            # Pull latest image
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-gallery:latest
 
-          # Create compose file
-          cat << 'EOF' > docker-compose.yml
-          version: "3.8"
-          services:
-            server:
-              image: ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-gallery:latest
-              container_name: laravel_server
-              environment:
-                - APP_ENV=production
-                - APP_DEBUG=false
-                - DB_HOST=database
-                - DB_DATABASE=gallerydb
-                - DB_USERNAME=root
-                - DB_PASSWORD=1234
-                - JWT_SECRET=pJrp4ESHr8mTpBYsQbo2gcTpyu7ZSE3rsTKw4PMvPSA7dQK9DmFHpHc0BvGITYoT
-              ports:
-                - "8000:80"
-              depends_on:
-                - database
-              volumes:
-                - laravel_storage:/var/www/html/storage
+            # Create compose file
+            cat << 'EOF' > docker-compose.yml
+            version: "3.8"
+            services:
+              server:
+                image: ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-gallery:latest
+                container_name: laravel_server
+                environment:
+                  - APP_ENV=production
+                  - APP_DEBUG=false
+                  - DB_HOST=database
+                  - DB_DATABASE=gallerydb
+                  - DB_USERNAME=root
+                  - DB_PASSWORD=1234
+                  - JWT_SECRET=pJrp4ESHr8mTpBYsQbo2gcTpyu7ZSE3rsTKw4PMvPSA7dQK9DmFHpHc0BvGITYoT
+                ports:
+                  - "8000:80"
+                depends_on:
+                  - database
+                volumes:
+                  - laravel_storage:/var/www/html/storage
 
-            database:
-              image: mysql:8.0
-              container_name: mysql_db
-              environment:
-                - MYSQL_ROOT_PASSWORD=1234
-                - MYSQL_DATABASE=gallerydb
-              ports:
-                - "3306:3306"
-              volumes:
-                - db_data:/var/lib/mysql
+              database:
+                image: mysql:8.0
+                container_name: mysql_db
+                environment:
+                  - MYSQL_ROOT_PASSWORD=1234
+                  - MYSQL_DATABASE=gallerydb
+                ports:
+                  - "3306:3306"
+                volumes:
+                  - db_data:/var/lib/mysql
 
-          volumes:
-            db_data:
-            laravel_storage:
-          EOF
+            volumes:
+              db_data:
+              laravel_storage:
+            EOF
 
-          # Start containers
-          docker-compose up -d
+            # Start containers
+            docker-compose up -d
