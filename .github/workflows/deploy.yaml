@@ -93,8 +93,7 @@ jobs:
             cd /var/www/gallery
 
             # Forcefully remove any existing containers and volumes
-            docker rm -f laravel_server mysql_db || true
-            docker volume rm gallery_db_data gallery_laravel_storage || true
+            docker-compose down -v || true
 
             # Pull latest image
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/laravel-gallery:latest
@@ -117,9 +116,15 @@ jobs:
                 ports:
                   - "8000:80"
                 depends_on:
-                  - database
+                  database:
+                    condition: service_healthy
                 volumes:
                   - laravel_storage:/var/www/html/storage
+                healthcheck:
+                  test: ["CMD", "curl", "-f", "http://localhost:80"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
 
               database:
                 image: mysql:8.0
@@ -131,6 +136,11 @@ jobs:
                   - "3306:3306"
                 volumes:
                   - db_data:/var/lib/mysql
+                healthcheck:
+                  test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+                  interval: 20s
+                  timeout: 10s
+                  retries: 10
 
             volumes:
               db_data:
@@ -139,3 +149,43 @@ jobs:
 
             # Start containers
             docker-compose up -d
+
+            # Wait for database to be ready
+            sleep 20
+
+            # Initialize Laravel
+            docker exec laravel_server bash -c "
+              # Create .env file if it doesn't exist
+              if [ ! -f .env ]; then
+                cp .env.example .env
+                # Set production values
+                sed -i 's/APP_ENV=local/APP_ENV=production/' .env
+                sed -i 's/APP_DEBUG=true/APP_DEBUG=false/' .env
+                sed -i 's/DB_HOST=127.0.0.1/DB_HOST=database/' .env
+                # Generate application key
+                php artisan key:generate
+              fi
+
+              # Clear and cache config
+              php artisan config:clear
+              php artisan cache:clear
+
+              # Install session and cache tables
+              php artisan session:table
+              php artisan cache:table
+
+              # Run migrations
+              php artisan migrate --force
+
+              # Link storage
+              php artisan storage:link
+
+              # Cache routes and views
+              php artisan config:cache
+              php artisan route:cache
+              php artisan view:cache
+
+              # Fix permissions
+              chown -R www-data:www-data storage bootstrap/cache
+              chmod -R 775 storage bootstrap/cache
+            "
