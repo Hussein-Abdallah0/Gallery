@@ -1,3 +1,4 @@
+http://35.180.247.200:8000/
 # Picture Management Desktop Application
 
 A desktop application built with Electron.js and React for managing, editing, and sharing pictures, with a Laravel backend and real-time chat functionality.
